@@ -158,6 +158,14 @@ tidyData <- selectedData %>%
   summarise_each(funs(mean))
 tidyData <- ungroup(tidyData)
 
+## Writing output file
+print("Writing output file tidyData.txt...")
+write.table(tidyData,
+            file = "./tidyData.txt",
+            row.names = FALSE,
+            quote = FALSE)
+
 ## Clean up objects no more needed
 print("Cleaning up...")
-rm(mergedData, features, activityLabels, meanOrStd, selected)
+rm(mergedData, features, activityLabels, meanOrStd, selectedData, tidyData)
+
