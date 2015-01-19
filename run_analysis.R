@@ -43,21 +43,33 @@ features <- read.table("UCI HAR Dataset/features.txt",
                        as.is = TRUE
 )
 ## Clean up names
-features <- features %>% mutate(V2 = gsub("[()]", "", V2))
-features <- features %>% mutate(V2 = gsub(",", "_", V2))
+features <- features %>% mutate(names = paste(V1, V2, sep = "_"))
+features$V1 <- NULL
+features$V2 <- NULL
+features <- features %>% mutate(names = gsub("[()]", "", names))
+features <- features %>% mutate(names = gsub(",", "_", names))
 
+## Get activity labels
+print("Loading activity labels...")
+activityLabels <- read.table("UCI HAR Dataset/activity_labels.txt", 
+                             header = FALSE, 
+                             sep = "", 
+                             as.is = TRUE, 
+                             col.names = c("activityId", "activityName")
+)
 
-## Test activity
+## Test set activities
 print("Loading activities from test data...")
 activities <- read.table("UCI HAR Dataset/test/y_test.txt", 
                      header = FALSE, 
                      sep = "", 
                      dec = ".", 
                      as.is = TRUE,
-                     col.names = c("activityName")
+                     col.names = c("activityId")
                      )
+activities <- inner_join(activities, activityLabels, by = "activityId")
 
-## Test subject
+## Test set subject
 print("Loading subjects from test data...")
 subjects <- read.table("UCI HAR Dataset/test/subject_test.txt", 
                            header = FALSE, 
@@ -67,7 +79,7 @@ subjects <- read.table("UCI HAR Dataset/test/subject_test.txt",
                            col.name = c("subjectId")
                            )
 
-## Test values
+## Test set values
 print("Loading values from test data...")
 X_test <- read.table("UCI HAR Dataset/test/X_test.txt", 
                      header = FALSE, 
@@ -77,23 +89,24 @@ X_test <- read.table("UCI HAR Dataset/test/X_test.txt",
                      )
 
 ## Assign variable names
-names(X_test) <- features$V2
+names(X_test) <- features$names
 
 ## Initial merged data
-mergedData <- cbind(subjects, activities, X_test)
+mergedData <- cbind(subjects, activities$activityName, X_test)
 
 ## Clean up variables before reading train data
 rm("subjects", "activities", "X_test")
 
-## Train activity
+## Train set activity
 print("Loading activities from train data...")
 activities <- read.table("UCI HAR Dataset/train/y_train.txt", 
                          header = FALSE, 
                          sep = "", 
                          dec = ".", 
                          as.is = TRUE,
-                         col.names = c("activityName")
+                         col.names = c("activityId")
 )
+activities <- inner_join(activities, activityLabels, by = "activityId")
 
 ## Train subjects
 print("Loading subjects from train data...")
@@ -115,16 +128,36 @@ X_train <- read.table("UCI HAR Dataset/train/X_train.txt",
 )
 
 ## Assign variable names
-names(X_train) <- features$V2
+names(X_train) <- features$names
 
 ## Build train data
-X_train <- cbind(subjects, activities, X_train)
+X_train <- cbind(subjects, activities$activityName, X_train)
 
 ## Complete merged data
 print("Craeting merged dataset...")
 mergedData <- rbind(mergedData, X_train)
+names(mergedData)[2] <- "activityName"
 
 ## Clean up objects no more needed
 print("Cleaning up...")
 rm(activities, subjects, X_train)
 
+## Get the column names containing 'mean' or 'std'
+print("Getting mean or std data only...")
+meanOrStd <- grepl("mean", features$names, ignore.case = TRUE) | 
+  grepl("std", features$names, ignore.case = TRUE)
+
+## Select the required columns only
+selectedData <- mergedData[, c(TRUE, TRUE, meanOrStd)]
+names(selectedData) <- gsub("[0-9]+_", "", names(selectedData))
+
+## Generated the tidy dataset
+print("Generating the output dataset...")
+tidyData <- selectedData %>%
+  group_by(subjectId, activityName) %>%
+  summarise_each(funs(mean))
+tidyData <- ungroup(tidyData)
+
+## Clean up objects no more needed
+print("Cleaning up...")
+rm(mergedData, features, activityLabels, meanOrStd, selected)
