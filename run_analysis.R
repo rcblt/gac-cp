@@ -10,10 +10,8 @@ print("Loading libraries...")
 myPackages <- rownames(installed.packages())
 if (!"dplyr" %in% myPackages)
   stop("dplyr package is not installed, aborting")
-if (!"tidyr" %in% myPackages)
-  stop("tidyr package is not installed, aborting")
+
 library(dplyr, quietly = TRUE)
-library(tidyr, quietly = TRUE)
 rm(myPackages)
 
 ## Check for source data directory and required files
