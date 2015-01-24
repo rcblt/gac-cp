@@ -22,32 +22,28 @@ if (!file.exists("UCI HAR Dataset"))
   stop("Source data directory 'UCI HAR Dataset' does not exist, aborting")
 if (!file.info("UCI HAR Dataset")$isdir)
   stop("'UCI HAR Dataset' is not a directory, aborting")
-myRequiredFiles <- c("test/subject_test.txt", 
-                     "test/X_test.txt", 
-                     "test/y_test.txt",
-                     "train/subject_train.txt",
-                     "train/X_train.txt", 
-                     "train/y_train.txt", 
-                     "features.txt")
+myRequiredFiles <- c("UCI HAR Dataset/test/subject_test.txt", 
+                     "UCI HAR Dataset/test/X_test.txt", 
+                     "UCI HAR Dataset/test/y_test.txt",
+                     "UCI HAR Dataset/train/subject_train.txt",
+                     "UCI HAR Dataset/train/X_train.txt", 
+                     "UCI HAR Dataset/train/y_train.txt", 
+                     "features_cleaned.txt")
 for (myFile in myRequiredFiles) { 
-  if (!file.exists(paste("UCI HAR Dataset/", myFile, sep = ""))) 
+  if (!file.exists(myFile)) 
     stop(paste("File '", myFile, "' does not exist, aborting"))
 }
 rm(myRequiredFiles, myFile)
 
 ## Value names
 print("Loading variable names...")
-features <- read.table("UCI HAR Dataset/features.txt", 
+features <- read.table("features_cleaned.txt", 
                        header = FALSE, 
                        sep = "", 
                        as.is = TRUE
 )
-## Clean up names
-features <- features %>% mutate(names = paste(V1, V2, sep = "_"))
-features$V1 <- NULL
-features$V2 <- NULL
-features <- features %>% mutate(names = gsub("[()]", "", names))
-features <- features %>% mutate(names = gsub(",", "_", names))
+## Assign column name
+names(features) <- c("names")
 
 ## Get activity labels
 print("Loading activity labels...")
