@@ -4,12 +4,12 @@
 
 ### Summary
 
-* [Repo content](#-repo content-)
-* [Generation of output file](#-generation of output file-)
-* [Usage of tidy dataset](#-usage of tidy dataset-)
+* [Repo content](#repo-content)
+* [Generation of output file](#generation-of-output-file)
+* [Usage of tidy dataset](#usage-of-tidy-dataset)
 * [Requirements](#requirements)
-* [Features file](#-features file-)
-* [run_analysis.R](#run_analysis.R)
+* [Features file](#features-file)
+* [run_analysis.R](#run_analysisr)
 
 ### Repo content
 
